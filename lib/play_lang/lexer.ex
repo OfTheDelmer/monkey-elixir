@@ -37,65 +37,73 @@ defmodule PlayLang.Lexer do
     lex = skip_whitespace(lexer)
 
     case lex.ch do
-      "=" -> %{
-        token: new_token(t."ASSIGN", lex.ch),
-        lexer: lex |> read_char()
-      }
-      ";" -> %{
-        token: new_token(t."SEMICOLON", lex.ch),
-        lexer: lex |> read_char()
-      }
-      "(" -> %{
-        token: new_token(t."LPAREN", lex.ch),
-        lexer: lex |> read_char()
-      }
-      ")" -> %{
-        token: new_token(t."RPAREN", lex.ch),
-        lexer: lex |> read_char()
-      }
-      "," -> %{
-        token: new_token(t."COMMA", lex.ch),
-        lexer: lex |> read_char()
-      }
-      "+" -> %{
-        token: new_token(t."PLUS", lex.ch),
-        lexer: lex |> read_char()
-      }
-      "{" -> %{
-        token: new_token(t."LBRACE", lex.ch),
-        lexer: lex |> read_char()
-      }
-      "}" -> %{
-        token: new_token(t."RBRACE", lex.ch),
-        lexer: lex |> read_char()
-      }
-      0 -> %{
-        token: new_token(t."EOF", ""),
-        lexer: lex |> read_char()
-      }
+      "=" -> with_token(
+          lex |> read_char(),
+          new_token(t."ASSIGN", lex.ch)
+        )
+      ";" -> with_token(
+          lex |> read_char(),
+          new_token(t."SEMICOLON", lex.ch)
+        )
+      "(" -> with_token(
+          lex |> read_char(),
+          new_token(t."LPAREN", lex.ch)
+        )
+      ")" -> with_token(
+          lex |> read_char(),
+          new_token(t."RPAREN", lex.ch)
+        )
+      "," -> with_token(
+          lex |> read_char(),
+          new_token(t."COMMA", lex.ch)
+        )
+      "+" -> with_token(
+          lex |> read_char(),
+          new_token(t."PLUS", lex.ch)
+        )
+      "{" -> with_token(
+          lex |> read_char(),
+          new_token(t."LBRACE", lex.ch)
+        )
+      "}" -> with_token(
+          lex |> read_char(),
+          new_token(t."RBRACE", lex.ch)
+        )
+      0 -> with_token(
+          lex |> read_char(),
+          new_token(t."EOF", "")
+        )
       ch ->
         cond do
           letter?(ch) ->
             %{
-              lexer: lexer,
+              lexer: next_lex,
               ident: ident
             } = read_identifier(lex)
 
             tok = new_token(Token.findIdent(ident), ident)
-            %{token: tok, lexer: lexer}
+            with_token(next_lex, tok)
           digit?(ch) ->
             %{
-              lexer: lexer,
+              lexer: next_lex,
               number: number
             } = lex |> read_number()
 
             tok = new_token(t."INT", number)
-            %{token: tok, lexer: lexer}
+            with_token(next_lex, tok)
           true ->
-            new_token(t."ILLEGAL", ch)
+            token = new_token(t."ILLEGAL", ch)
+            with_token(lex |> read_char(), token)
         end
     end
+  end
 
+
+  def with_token(lexer, token) do
+    %{
+      lexer: lexer,
+      token: token
+    }
   end
 
   def new_token(type, ch) do
