@@ -15,5 +15,5 @@ mix escript.build
 And to get the tokens run the following:
 
 ```
-./play_lang --file=sample.monkey
+./play_lang lex --file=sample.monkey
 ```
