@@ -37,67 +37,53 @@ defmodule PlayLang.Lexer do
     lex = skip_whitespace(lexer)
 
     case lex.ch do
-      "=" -> with_token(
-          lex |> read_char(),
-          new_token(t."ASSIGN", lex.ch)
-        )
-      ";" -> with_token(
-          lex |> read_char(),
-          new_token(t."SEMICOLON", lex.ch)
-        )
-      "(" -> with_token(
-          lex |> read_char(),
-          new_token(t."LPAREN", lex.ch)
-        )
-      ")" -> with_token(
-          lex |> read_char(),
-          new_token(t."RPAREN", lex.ch)
-        )
-      "," -> with_token(
-          lex |> read_char(),
-          new_token(t."COMMA", lex.ch)
-        )
-      "+" -> with_token(
-          lex |> read_char(),
-          new_token(t."PLUS", lex.ch)
-        )
-      "{" -> with_token(
-          lex |> read_char(),
-          new_token(t."LBRACE", lex.ch)
-        )
-      "}" -> with_token(
-          lex |> read_char(),
-          new_token(t."RBRACE", lex.ch)
-        )
-      0 -> with_token(
-          lex |> read_char(),
-          new_token(t."EOF", "")
-        )
+      "=" -> lex_char(lex, t."ASSIGN")
+      ";" -> lex_char(lex, t."SEMICOLON")
+      "(" -> lex_char(lex, t."LPAREN")
+      ")" -> lex_char(lex, t."RPAREN")
+      "," -> lex_char(lex, t."COMMA")
+      "+" -> lex_char(lex, t."PLUS")
+      "-" -> lex_char(lex, t."MINUS")
+      "!" -> lex_char(lex, t."BANG")
+      "/" -> lex_char(lex, t."SLASH")
+      "*" -> lex_char(lex, t."ASTERISK")
+      "<" -> lex_char(lex, t."LT")
+      ">" -> lex_char(lex, t."GT")
+      "{" -> lex_char(lex, t."LBRACE")
+      "}" -> lex_char(lex, t."RBRACE")
+      0 -> lex_char(lex, t."EOF", "")
       ch ->
         cond do
           letter?(ch) ->
-            %{
-              lexer: next_lex,
-              ident: ident
-            } = read_identifier(lex)
-
-            tok = new_token(Token.findIdent(ident), ident)
-            with_token(next_lex, tok)
+            lex_pattern(lex, &Lexer.read_identifier/1, &Token.findIdent/1)
           digit?(ch) ->
-            %{
-              lexer: next_lex,
-              number: number
-            } = lex |> read_number()
-
-            tok = new_token(t."INT", number)
-            with_token(next_lex, tok)
+            lex_pattern(lex, &Lexer.read_number/1, fn (_n) -> t."INT" end)
           true ->
-            token = new_token(t."ILLEGAL", ch)
-            with_token(lex |> read_char(), token)
+            lex_char(lex, t."ILLEGAL")
         end
     end
   end
 
+  def lex_pattern(lex, reader, token_lookup) do
+    %{
+      lexer: next_lex,
+      literal: literal
+    } = reader.(lex)
+
+    token = new_token(token_lookup.(literal), literal)
+    with_token(next_lex, token)
+  end
+
+  def lex_char(lex, type) do
+    lex_char(lex, type, lex.ch)
+  end
+
+  def lex_char(lex, type, ch) do
+    with_token(
+      lex |> read_char(),
+      new_token(type, ch)
+    )
+  end
 
   def with_token(lexer, token) do
     %{
@@ -149,7 +135,7 @@ defmodule PlayLang.Lexer do
         read_identifier(lexer, start)
       true ->
         %{
-          ident: lex.input |> String.slice(start, lex.position - start),
+          literal: lex.input |> String.slice(start, lex.position - start),
           lexer: lex
         }
     end
@@ -182,7 +168,7 @@ defmodule PlayLang.Lexer do
       true ->
         %{
           lexer: lex,
-          number: String.slice(lex.input, start, lex.position - start)
+          literal: String.slice(lex.input, start, lex.position - start)
         }
     end
   end

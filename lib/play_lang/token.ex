@@ -10,6 +10,12 @@ defmodule PlayLang.Token do
 
     ASSIGN: "ASSIGN",
     PLUS: "PLUS",
+    MINUS: "-",
+    BANG: "!",
+    ASTERISK: "*",
+    SLASH: "/",
+    LT: "<",
+    GT: ">",
 
     COMMA: ",",
     SEMICOLON: ";",

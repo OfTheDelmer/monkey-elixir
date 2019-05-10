@@ -89,6 +89,38 @@ defmodule PlayLang.LexerTest do
     test_tokens(lex_start, tests)
   end
 
+
+  test "extended operators" do
+    input = """
+      !-/*5;
+      5 < 10 > 5;
+    """
+
+    tokens = Token.tokens
+
+    tests = [
+      {tokens."BANG", "!"},
+      {tokens."MINUS", "-"},
+      {tokens."SLASH", "/"},
+      {tokens."ASTERISK", "*"},
+      {tokens."INT", "5"},
+      {tokens."SEMICOLON", ";"},
+
+      {tokens."INT", "5"},
+      {tokens."LT", "<"},
+      {tokens."INT", "10"},
+      {tokens."GT", ">"},
+      {tokens."INT", "5"},
+      {tokens."SEMICOLON", ";"},
+
+      {tokens."EOF", ""},
+    ]
+
+    lex_start = Lexer.new(input)
+
+    test_tokens(lex_start, tests)
+  end
+
   def test_tokens(lex_start, tests) do
     Enum.reduce(tests, lex_start, fn({
       expectedType,
