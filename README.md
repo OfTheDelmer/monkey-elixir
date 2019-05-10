@@ -1,21 +1,19 @@
 # PlayLang
 
-**TODO: Add description**
+Run the tests
 
-## Installation
-
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `play_lang` to your list of dependencies in `mix.exs`:
-
-```elixir
-def deps do
-  [
-    {:play_lang, "~> 0.1.0"}
-  ]
-end
+```
+mix test
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/play_lang](https://hexdocs.pm/play_lang).
+Then run 
 
+```
+mix escript.build
+```
+
+And to get the tokens run the following:
+
+```
+./play_lang --file=sample.monkey
+```
