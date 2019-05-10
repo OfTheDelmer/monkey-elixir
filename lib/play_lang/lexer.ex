@@ -37,14 +37,22 @@ defmodule PlayLang.Lexer do
     lex = skip_whitespace(lexer)
 
     case lex.ch do
-      "=" -> lex_char(lex, t."ASSIGN")
+      "=" ->
+        cond do
+          peek_char(lex) == "=" -> lex_char(lex |> read_char(), t."EQ", lex.ch <> peek_char(lex))
+          true -> lex_char(lex, t."ASSIGN")
+        end
       ";" -> lex_char(lex, t."SEMICOLON")
       "(" -> lex_char(lex, t."LPAREN")
       ")" -> lex_char(lex, t."RPAREN")
       "," -> lex_char(lex, t."COMMA")
       "+" -> lex_char(lex, t."PLUS")
       "-" -> lex_char(lex, t."MINUS")
-      "!" -> lex_char(lex, t."BANG")
+      "!" ->
+        cond do
+          peek_char(lex) == "=" -> lex_char(lex |> read_char(), t."NOT_EQ", lex.ch <> peek_char(lex))
+          true -> lex_char(lex, t."BANG")
+        end
       "/" -> lex_char(lex, t."SLASH")
       "*" -> lex_char(lex, t."ASTERISK")
       "<" -> lex_char(lex, t."LT")
@@ -101,6 +109,13 @@ defmodule PlayLang.Lexer do
 
   def read_tokens(lex) do
     read_tokens(lex, [])
+  end
+
+  def peek_char(lex) do
+    cond do
+      lex.read_position >= String.length(lex.input) -> 0
+      true -> lex.input |> String.at(lex.read_position)
+    end
   end
 
   def read_tokens(lex, tokens) do

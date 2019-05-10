@@ -17,6 +17,9 @@ defmodule PlayLang.Token do
     LT: "<",
     GT: ">",
 
+    EQ: "==",
+    NOT_EQ: "!=",
+
     COMMA: ",",
     SEMICOLON: ";",
 

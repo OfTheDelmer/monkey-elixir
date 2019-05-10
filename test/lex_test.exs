@@ -121,6 +121,32 @@ defmodule PlayLang.LexerTest do
     test_tokens(lex_start, tests)
   end
 
+  test "equalities" do
+    input = """
+      10 == 10;
+      10 != 9;
+    """
+    tokens = Token.tokens
+
+    tests = [
+      {tokens."INT", "10"},
+      {tokens."EQ", "=="},
+      {tokens."INT", "10"},
+      {tokens."SEMICOLON", ";"},
+
+      {tokens."INT", "10"},
+      {tokens."NOT_EQ", "!="},
+      {tokens."INT", "9"},
+      {tokens."SEMICOLON", ";"},
+
+      {tokens."EOF", ""},
+    ]
+
+    lex_start = Lexer.new(input)
+
+    test_tokens(lex_start, tests)
+  end
+
   def test_tokens(lex_start, tests) do
     Enum.reduce(tests, lex_start, fn({
       expectedType,
